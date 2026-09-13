@@ -74,7 +74,18 @@
       <button type="button" class="icon-btn" id="mute" aria-label="音のオン・オフ">🔊</button>
       <button type="button" class="icon-btn" id="pauseBtn" aria-label="一時停止">⏸</button>
     </div>
-    <div class="deck-note"><b>操作盤</b><br>押しっぱで急降下。画面は狙い。</div>
+    <div class="deck-note"><b>操作盤</b><br>十字で狙い。Bで上昇、Aで急降下。</div>
+    <div class="nes-dpad" aria-label="十字キー">
+      <button type="button" class="dpad-key dpad-up" data-dir="up" aria-label="上">▲</button>
+      <button type="button" class="dpad-key dpad-left" data-dir="left" aria-label="左">◀</button>
+      <span class="dpad-center" aria-hidden="true"></span>
+      <button type="button" class="dpad-key dpad-right" data-dir="right" aria-label="右">▶</button>
+      <button type="button" class="dpad-key dpad-down" data-dir="down" aria-label="下">▼</button>
+    </div>
+    <div class="nes-actions" aria-label="ファミコンボタン">
+      <button type="button" class="nes-button nes-b" data-action="rise" aria-label="Bボタン">B</button>
+      <button type="button" class="nes-button nes-a" data-action="dive" aria-label="Aボタン">A</button>
+    </div>
     <button type="button" id="btnDive" aria-label="急降下">急降下<small>HOLD</small></button>
   </div>
 </div>

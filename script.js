@@ -41,6 +41,7 @@ let score=0, combo=0, comboT=0, maxCombo=0, catches=0, best=0, level=0;
 let flash=0, shake=0, cloudFlash=0;
 let idleT=0, idleMode='title';
 let diving=false, canvasHold=false, deckHold=false, paused=false, aimX=0, aimY=0, keys={}, targetBird=null, targetScreenDist=Infinity;
+let padX=0, padY=0;
 let audioCtx=null, master=null, windSource=null, windFilter=null, windGain=null, diveSoundOn=false;
 let bgmKind=null, bgmNode=null, muted=false;
 const bgmBuf={title:null, play:null};
@@ -428,7 +429,7 @@ function toLocal(e){
   return {x:(e.clientX!==undefined?e.clientX:e.touches[0].clientX)-r.left,
           y:(e.clientY!==undefined?e.clientY:e.touches[0].clientY)-r.top};
 }
-function syncDive(){ diving=canvasHold||deckHold||!!keys.Space; }
+function syncDive(){ diving=canvasHold||deckHold||!!keys.Space||!!keys.KeyZ; }
 cv.addEventListener('pointerdown',e=>{
   e.preventDefault();
   const p=toLocal(e); aimX=p.x; aimY=p.y;
@@ -440,10 +441,10 @@ cv.addEventListener('pointerup',()=>{ canvasHold=false; syncDive(); if(!deckHold
 cv.addEventListener('pointercancel',()=>{ canvasHold=false; syncDive(); if(!deckHold){ aimX=W/2; aimY=H/2; } });
 addEventListener('keydown',e=>{
   keys[e.code]=true;
-  if(e.code==='Space'){ syncDive(); e.preventDefault(); }
+  if(e.code==='Space'||e.code==='KeyZ'||e.code==='KeyX'){ syncDive(); e.preventDefault(); }
   if((e.code==='Escape'||e.code==='KeyP')&&running){ setPaused(!paused); e.preventDefault(); }
 });
-addEventListener('keyup',e=>{ keys[e.code]=false; if(e.code==='Space') syncDive(); });
+addEventListener('keyup',e=>{ keys[e.code]=false; if(e.code==='Space'||e.code==='KeyZ'||e.code==='KeyX') syncDive(); });
 
 // ---- 更新 ----
 function update(dt){
@@ -451,8 +452,8 @@ function update(dt){
   timeLeft-=dt;
   if(timeLeft<=0){ timeLeft=0; endGame(); return; }
 
-  const kx=(keys.ArrowRight||keys.KeyD?1:0)-(keys.ArrowLeft||keys.KeyA?1:0);
-  const ky=(keys.ArrowDown||keys.KeyS?1:0)-(keys.ArrowUp||keys.KeyW?1:0);
+  const kx=(keys.ArrowRight||keys.KeyD?1:0)-(keys.ArrowLeft||keys.KeyA?1:0)+padX;
+  const ky=(keys.ArrowDown||keys.KeyS?1:0)-(keys.ArrowUp||keys.KeyW?1:0)+padY;
   if(kx||ky){ aimX=W/2+kx*W*0.32; aimY=H/2+ky*H*0.32; }
 
   const gs=F/Math.max(hawk.alt,10);
@@ -463,6 +464,10 @@ function update(dt){
     hawk.vAlt=Math.min(hawk.vAlt+520*dt,150);
   }else if(diving){
     hawk.vAlt=Math.max(hawk.vAlt-820*dt,-390);
+  }else if(keys.KeyX){
+    // Bボタン：羽ばたきで上昇を補助
+    hawk.vAlt=Math.min(hawk.vAlt+720*dt,340);
+    hawk.stam-=18*dt;
   }else{
     if(hawk.stam>0){ hawk.vAlt=Math.min(hawk.vAlt+380*dt,175); hawk.stam-=24*dt; }
     else { hawk.vAlt=Math.min(hawk.vAlt+120*dt,-10); }
@@ -1012,6 +1017,18 @@ function bindHold(el, on, off){
   el.addEventListener('pointerup', end);
   el.addEventListener('pointercancel', end);
 }
+function bindController(){
+  const dirs={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
+  document.querySelectorAll('[data-dir]').forEach(el=>{
+    const [x,y]=dirs[el.dataset.dir];
+    bindHold(el,()=>{padX=x;padY=y;},()=>{if(padX===x)padX=0;if(padY===y)padY=0;});
+  });
+  const b=document.querySelector('[data-action="rise"]');
+  const a=document.querySelector('[data-action="dive"]');
+  bindHold(b,()=>{keys.KeyX=true;},()=>{keys.KeyX=false;});
+  bindHold(a,()=>{keys.KeyZ=true;syncDive();},()=>{keys.KeyZ=false;syncDive();});
+}
+bindController();
 function setPaused(on){
   if(!running) return;
   paused=!!on;
