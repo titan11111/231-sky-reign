@@ -20,16 +20,15 @@ html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none;backgr
   padding-right:max(12px,calc(12px + env(safe-area-inset-right,0px)));
   background:linear-gradient(180deg,#142033 0%,#0a1018 100%);
   border-top:1px solid rgba(242,234,216,.16);overflow:hidden;touch-action:none}
-.deck-tools{display:flex;flex-direction:column;justify-content:center;gap:8px;flex-shrink:0}
 .deck-note{flex:1 1 auto;font-size:11px;line-height:1.55;color:#8fa2b8;min-width:0}
 .deck-note b{color:#f2ead8}
 
 /* ファミコン配置：十字キーを左、B→Aを右に置く */
-.nes-dpad{position:relative;flex:0 0 126px;width:126px;height:96px;filter:drop-shadow(0 5px 0 rgba(0,0,0,.35))}
-.dpad-key,.dpad-center{position:absolute;width:36px;height:36px;min-width:36px;min-height:36px;padding:0;border-radius:4px;background:#263a51;border:1px solid rgba(242,234,216,.22);box-shadow:none;color:#dce8f5;font-size:14px;letter-spacing:0;z-index:1}
+.nes-dpad{position:relative;flex:0 0 162px;width:162px;height:126px;filter:drop-shadow(0 6px 0 rgba(0,0,0,.35))}
+.dpad-key,.dpad-center{position:absolute;width:48px;height:48px;min-width:48px;min-height:48px;padding:0;border-radius:5px;background:#263a51;border:1px solid rgba(242,234,216,.22);box-shadow:none;color:#dce8f5;font-size:17px;letter-spacing:0;z-index:1}
 .dpad-key:active,.dpad-key.is-held{transform:translateY(2px);box-shadow:inset 0 0 0 2px rgba(240,201,106,.62);background:#355371}
-.dpad-up{left:45px;top:0}.dpad-left{left:9px;top:31px}.dpad-right{right:9px;top:31px}.dpad-down{left:45px;bottom:0}
-.dpad-center{left:45px;top:31px;background:#1c2b3d;border-color:rgba(242,234,216,.12);z-index:0}
+.dpad-up{left:57px;top:0}.dpad-left{left:9px;top:39px}.dpad-right{right:9px;top:39px}.dpad-down{left:57px;bottom:0}
+.dpad-center{left:57px;top:39px;background:#1c2b3d;border-color:rgba(242,234,216,.12);z-index:0}
 .nes-actions{display:flex;align-items:center;gap:12px;flex:0 0 auto;padding:0 4px}
 .nes-button{width:48px;height:48px;min-width:48px;min-height:48px;padding:0;border-radius:50%;font-family:Arial,sans-serif;font-size:18px;font-weight:900;letter-spacing:0;color:#ffe9ee;background:#a54857;border:2px solid #d2757e;box-shadow:0 5px 0 #622c3a,0 7px 12px rgba(0,0,0,.3)}
 .nes-button:active,.nes-button.is-held{transform:translateY(4px) scale(.95);box-shadow:0 1px 0 #622c3a;background:#d0606b}
@@ -57,15 +56,14 @@ button:active,button.is-pressed{transform:translateY(5px) scale(.98);box-shadow:
 #btnDive.is-held,#btnDive:active{transform:scale(.92) translateY(4px);box-shadow:0 2px 0 #8a5f18}
 @media (max-width:720px){
   .deck-note{font-size:9px;line-height:1.45}
-  .nes-dpad{flex-basis:108px;width:108px;height:84px;transform:scale(.88);transform-origin:center}
+  .nes-dpad{flex-basis:142px;width:142px;height:112px;transform:scale(.9);transform-origin:center}
   .nes-actions{gap:6px;padding:0}
   .nes-button{width:42px;height:42px;min-width:42px;min-height:42px;font-size:16px}
   #btnDive{min-width:72px;padding:8px 10px;font-size:11px}
 }
 @media (max-width:470px){
   .deck-note{display:none}
-  .deck-tools{gap:4px}
-  .nes-dpad{flex-basis:104px;width:104px}
+  .nes-dpad{flex-basis:132px;width:132px}
   .nes-actions{gap:4px}
   #btnDive{min-width:64px;padding-left:6px;padding-right:6px}
 }
