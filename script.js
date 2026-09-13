@@ -30,6 +30,8 @@ resize();
 // ---- 定数 ----
 const MAX_ALT=520, MIN_DIST=16, CELL=190;
 const CAPTURE_RADIUS=36, CAPTURE_ALTITUDE=30;
+// 地面激突の判定高度。ここを上げると早めに激突、下げると地面ぎりぎりまで飛べる。
+const GROUND_CRASH_ALT=6;
 const SUNX=0.42, SUNY=0.62;
 const GAME_TIME=90;
 
@@ -40,7 +42,7 @@ let birds=[], clouds=[], puffs=[], pops=[];
 let score=0, combo=0, comboT=0, maxCombo=0, catches=0, best=0, level=0;
 let flash=0, shake=0, cloudFlash=0;
 let idleT=0, idleMode='title';
-let diving=false, canvasHold=false, deckHold=false, paused=false, aimX=0, aimY=0, keys={}, targetBird=null, targetScreenDist=Infinity;
+let diving=false, canvasHold=false, deckHold=false, deckRise=false, paused=false, aimX=0, aimY=0, keys={}, targetBird=null, targetScreenDist=Infinity;
 let padX=0, padY=0;
 let audioCtx=null, master=null, windSource=null, windFilter=null, windGain=null, diveSoundOn=false;
 let bgmKind=null, bgmNode=null, muted=false;
@@ -375,7 +377,7 @@ function reset(){
   hawk.stam=100; hawk.stun=0; hawk.dir=-Math.PI/2; hawk.tuck=0; hawk.flapAmt=0; hawk.phase=0;
   birds=[]; puffs=[]; pops=[]; clouds=[];
   score=0; combo=0; comboT=0; maxCombo=0; catches=0; level=0;
-  timeLeft=GAME_TIME; flash=0; shake=0; cloudFlash=0; diving=false; canvasHold=false; deckHold=false;
+  timeLeft=GAME_TIME; flash=0; shake=0; cloudFlash=0; diving=false; canvasHold=false; deckHold=false; deckRise=false;
   aimX=W/2; aimY=H/2;
   for(let i=0;i<9;i++) spawnBird(true);
   for(let i=0;i<16;i++){
@@ -429,7 +431,7 @@ function toLocal(e){
   return {x:(e.clientX!==undefined?e.clientX:e.touches[0].clientX)-r.left,
           y:(e.clientY!==undefined?e.clientY:e.touches[0].clientY)-r.top};
 }
-function syncDive(){ diving=canvasHold||deckHold||!!keys.Space||!!keys.KeyZ; }
+function syncDive(){ diving=canvasHold||deckHold||!!keys.Space; }
 cv.addEventListener('pointerdown',e=>{
   e.preventDefault();
   const p=toLocal(e); aimX=p.x; aimY=p.y;
@@ -441,10 +443,10 @@ cv.addEventListener('pointerup',()=>{ canvasHold=false; syncDive(); if(!deckHold
 cv.addEventListener('pointercancel',()=>{ canvasHold=false; syncDive(); if(!deckHold){ aimX=W/2; aimY=H/2; } });
 addEventListener('keydown',e=>{
   keys[e.code]=true;
-  if(e.code==='Space'||e.code==='KeyZ'||e.code==='KeyX'){ syncDive(); e.preventDefault(); }
+  if(e.code==='Space'){ syncDive(); e.preventDefault(); }
   if((e.code==='Escape'||e.code==='KeyP')&&running){ setPaused(!paused); e.preventDefault(); }
 });
-addEventListener('keyup',e=>{ keys[e.code]=false; if(e.code==='Space'||e.code==='KeyZ'||e.code==='KeyX') syncDive(); });
+addEventListener('keyup',e=>{ keys[e.code]=false; if(e.code==='Space') syncDive(); });
 
 // ---- 更新 ----
 function update(dt){
@@ -464,8 +466,7 @@ function update(dt){
     hawk.vAlt=Math.min(hawk.vAlt+520*dt,150);
   }else if(diving){
     hawk.vAlt=Math.max(hawk.vAlt-820*dt,-390);
-  }else if(keys.KeyX){
-    // Bボタン：羽ばたきで上昇を補助
+  }else if(deckRise||keys.KeyR){
     hawk.vAlt=Math.min(hawk.vAlt+720*dt,340);
     hawk.stam-=18*dt;
   }else{
@@ -491,8 +492,8 @@ function update(dt){
 
   hawk.alt+=hawk.vAlt*dt;
   if(hawk.alt>MAX_ALT){hawk.alt=MAX_ALT;hawk.vAlt=0;}
-  if(hawk.alt<=6&&!stunned){
-    hawk.alt=6; hawk.vAlt=0; hawk.stun=1.15; shake=18; combo=0;
+  if(hawk.alt<=GROUND_CRASH_ALT&&!stunned){
+    hawk.alt=GROUND_CRASH_ALT; hawk.vAlt=0; hawk.stun=1.15; shake=18; combo=0;
     score=Math.max(0,score-40);
     sfxCrash();
     for(let i=0;i<22;i++) puffs.push({x:hawk.x+rnd(-14,14),y:hawk.y+rnd(-14,14),
@@ -1023,10 +1024,6 @@ function bindController(){
     const [x,y]=dirs[el.dataset.dir];
     bindHold(el,()=>{padX=x;padY=y;},()=>{if(padX===x)padX=0;if(padY===y)padY=0;});
   });
-  const b=document.querySelector('[data-action="rise"]');
-  const a=document.querySelector('[data-action="dive"]');
-  bindHold(b,()=>{keys.KeyX=true;},()=>{keys.KeyX=false;});
-  bindHold(a,()=>{keys.KeyZ=true;syncDive();},()=>{keys.KeyZ=false;syncDive();});
 }
 bindController();
 function setPaused(on){
@@ -1079,6 +1076,7 @@ bindTap(document.getElementById('mute'), toggleMute);
 bindTap(document.getElementById('pauseBtn'), e=>{ e.stopPropagation(); if(running) setPaused(!paused); });
 bindTap(document.getElementById('resumeBtn'), e=>{ e.stopPropagation(); setPaused(false); });
 bindHold(document.getElementById('btnDive'), ()=>{ deckHold=true; syncDive(); try{ensureAudio();}catch(e){} }, ()=>{ deckHold=false; syncDive(); });
+bindHold(document.getElementById('btnRise'), ()=>{ deckRise=true; try{ensureAudio();}catch(e){} }, ()=>{ deckRise=false; });
 
 reset(); // 背景を動かしておく
 })();
