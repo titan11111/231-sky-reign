@@ -142,3 +142,8 @@ canvas がポインタイベントを受け取れず `locator.tap: Timeout 3000m
 - 対処: `soten-dive.html` を index.html へのリダイレクト専用ページとして復活（meta refresh ＋ `location.replace()`。`?query`・`#hash` も引き継ぐ）
 - 検出元: `_tools/check-legacy-entry.sh`（245の同種事故を機に新設）。本番URLへcurlを撃って検出
 - 鉄則8: エントリ名を変えたら旧名をリダイレクトで必ず残す（本体URLが200のままなので気づけない）
+
+### 【裏取り済み】231だけは本物だった（2026-09-19）
+- `soten-dive.html` は初回コミット `fb6cbda add 231-day055` に**実在していた**＝**本当に公開されていたURL**
+- 9/14の一本化でHEADから消え、そこから404になっていた。**8本調べて、本当に壊れていたのはこの1本だけ**
+- 証拠: `git log --diff-filter=A -- soten-dive.html` に修復コミット以外のadd commitが存在する
