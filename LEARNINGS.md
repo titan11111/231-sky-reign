@@ -135,3 +135,10 @@ canvas がポインタイベントを受け取れず `locator.tap: Timeout 3000m
   （修正前は同日 T12-55-26 のレポートでタップ FAIL）
 - 目視: タイトル／プレイ中の2画面を Chromium 390×844 DPR2 で撮影、pageerror 0件
 - サイズ: 0.03MB（20MB鉄則の0.15%）
+
+## 2026-09-19 旧エントリURLの404を修復
+- 症状: `https://titan11111.github.io/231-sky-reign/soten-dive.html` が **404**。本体（`/231-sky-reign/`）は 200 で生きていた
+- 原因: エントリを `soten-dive.html` → `index.html` へ改名したため、**改名前に配ったリンクだけが死んだ**
+- 対処: `soten-dive.html` を index.html へのリダイレクト専用ページとして復活（meta refresh ＋ `location.replace()`。`?query`・`#hash` も引き継ぐ）
+- 検出元: `_tools/check-legacy-entry.sh`（245の同種事故を機に新設）。本番URLへcurlを撃って検出
+- 鉄則8: エントリ名を変えたら旧名をリダイレクトで必ず残す（本体URLが200のままなので気づけない）
